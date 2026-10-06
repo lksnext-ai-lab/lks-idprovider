@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test & build (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      - name: Install workspace
+        run: uv sync --all-packages --all-groups --frozen
+
+      # Integration tests need a live Keycloak / Entra ID tenant, so they are
+      # excluded here (same as the previous Jenkins pipeline).
+      - name: Unit tests
+        run: |
+          for dir in lks-idprovider-*/; do
+            echo "--- Testing $dir ---"
+            (cd "$dir" && uv run --frozen pytest \
+              --cov=src --cov-report=term-missing \
+              --ignore-glob="**/integration/**")
+          done
+
+      - name: Build packages
+        run: |
+          for dir in lks-idprovider-*/; do
+            uv build --package "$(basename "$dir")" --out-dir "$dir/dist"
+          done
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+
+      # Audits exactly what uv.lock resolves (all members, all groups).
+      - name: pip-audit
+        run: |
+          uv export --frozen --all-packages --all-groups --no-hashes \
+            --no-emit-workspace -o requirements-audit.txt
+          uv tool run pip-audit -r requirements-audit.txt \
+            --no-deps --disable-pip --progress-spinner off
