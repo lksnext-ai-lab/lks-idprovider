@@ -1,0 +1,53 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.16.9
+  hooks:
+    - id: ruff-check
+      args: [--fix, --exit-non-zero-on-fix]
+    - id: ruff-format
+-   repo: local
+    hooks:
+    -   id: pyright
+        name: pyright
+        entry: pyright
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+        args: [--pythonversion, '3.12']
+    -   id: pytest-api
+        name: pytest-api
+        entry: bash -c "cd lks-idprovider-api && uv run pytest --ignore=tests_api/integration"
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+    -   id: pytest-keycloak
+        name: pytest-keycloak
+        entry: bash -c "cd lks-idprovider-keycloak && uv run pytest --ignore=tests_keycloak/integration"
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+    -   id: pytest-fastapi
+        name: pytest-fastapi
+        entry: bash -c "cd lks-idprovider-fastapi && uv run pytest --ignore=tests/integration"
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+    -   id: pytest-entraid
+        name: pytest-entraid
+        entry: bash -c "cd lks-idprovider-entraid && uv run pytest --ignore=tests_entraid/integration"
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true

@@ -1,0 +1,79 @@
+name: Release
+
+# Creates a GitHub Release with the wheel + sdist of ONE package per tag, named <package>-v<version>, e.g.
+#   api-v0.1.7  keycloak-v0.1.5  entraid-v0.1.4  fastapi-v0.1.1
+# (same convention the old Jenkins "Tag Release" stage used).
+# Consumers install from the release assets (see README, "Installation").
+on:
+  push:
+    tags:
+      - "[a-z]*-v[0-9]*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & test
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.meta.outputs.package }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve package from tag
+        id: meta
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          pkg="lks-idprovider-${tag%-v*}"
+          version="${tag##*-v}"
+          [ -f "$pkg/pyproject.toml" ] || { echo "::error::No package '$pkg' for tag $tag"; exit 1; }
+          declared=$(grep -m1 '^version' "$pkg/pyproject.toml" | sed 's/.*"\(.*\)"/\1/')
+          [ "$declared" = "$version" ] || { echo "::error::Tag version $version != $pkg/pyproject.toml version $declared"; exit 1; }
+          echo "package=$pkg" >> "$GITHUB_OUTPUT"
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install workspace
+        run: uv sync --all-packages --all-groups --frozen
+
+      - name: Unit tests
+        working-directory: ${{ steps.meta.outputs.package }}
+        run: uv run --frozen pytest --ignore-glob="**/integration/**"
+
+      - name: Build
+        run: uv build --package "${{ steps.meta.outputs.package }}" --out-dir dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    name: GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the release and upload assets
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* \
+              --title "${{ needs.build.outputs.package }} ${GITHUB_REF_NAME##*-v}" \
+              --generate-notes --verify-tag
+          fi

@@ -1,0 +1,13 @@
+[project]
+name = "lks-idprovider-workspace"
+version = "0"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "lks-idprovider-api",
+    "lks-idprovider-keycloak",
+    "lks-idprovider-entraid",
+    "lks-idprovider-fastapi",
+]
