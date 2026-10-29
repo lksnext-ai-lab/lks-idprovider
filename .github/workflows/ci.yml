@@ -32,7 +32,7 @@ jobs:
         run: uv sync --all-packages --all-groups --frozen
 
       # Integration tests need a live Keycloak / Entra ID tenant, so they are
-      # excluded here (same as the previous Jenkins pipeline).
+      # excluded here; they require external services and credentials.
       - name: Unit tests
         run: |
           for dir in lks-idprovider-*/; do

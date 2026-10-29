@@ -43,42 +43,7 @@ RUN uv sync --group dev --frozen
 # Build the package
 RUN uv build --out-dir dist
 
-# Stage 2: Publishing stage with minimal dependencies
-FROM python:3.11-slim AS publisher
-
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
-
-# Install uv (only needed for publishing)
-RUN pip install uv
-
-# Set work directory
-WORKDIR /app
-
-# Create non-root user for security
-RUN useradd --create-home --shell /bin/bash --uid 1000 publisher \
-    && chown -R publisher:publisher /app
-
-# Copy built package and pyproject.toml
-# (no coverage.xml here: the builder stage doesn't run tests — coverage is
-# produced by the Jenkinsfile's own `docker run` step against the live checkout,
-# not by this image build, so there's nothing to copy)
-COPY --from=builder /app/lks-idprovider-keycloak/dist ./dist
-COPY --from=builder /app/lks-idprovider-keycloak/pyproject.toml ./
-
-# Fix ownership of copied files
-RUN chown -R publisher:publisher /app
-
-# Switch to non-root user
-USER publisher
-
-# Default command for publishing (will be overridden in Jenkins)
-CMD ["echo", "Build completed successfully. Use 'uv publish' to publish to repository."]
-
-# Stage 3: Development stage for local development
+# Development stage for local development
 FROM builder AS development
 
 # Install additional development tools

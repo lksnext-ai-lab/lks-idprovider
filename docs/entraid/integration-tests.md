@@ -1,6 +1,7 @@
 # Integration Tests for lks-idprovider-entraid
 
-This directory contains integration tests that make real API calls to Azure Entra ID and Microsoft Graph API.
+The integration tests make real API calls to Azure Entra ID and Microsoft Graph.
+Run the commands from the repository root.
 
 ## Prerequisites
 
@@ -14,12 +15,8 @@ This directory contains integration tests that make real API calls to Azure Entr
 
 ### Option 1: Using .env file (Recommended)
 
-1. Copy the example file:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Edit `.env` and add your Azure credentials:
+1. Create a local `.env` file with your Azure credentials (there is no checked-in
+  `.env.example`):
    ```env
    # Required (for basic tests)
    ENTRAID_TENANT_ID=your-tenant-id
@@ -34,7 +31,7 @@ This directory contains integration tests that make real API calls to Azure Entr
    # AZURE_TEST_PASSWORD=user-password
    ```
 
-3. The `.env` file is automatically loaded by pytest-dotenv (configured in `pyproject.toml`)
+2. Alternatively, export the variables in the shell that runs the tests.
 
 ### Option 2: Environment Variables
 
@@ -58,22 +55,22 @@ export ENTRAID_CLIENT_SECRET="your-client-secret"
 
 ### Run all integration tests:
 ```bash
-poetry run pytest tests_entraid/integration/ -v
+uv run --frozen pytest lks-idprovider-entraid/tests_entraid/integration/ -v
 ```
 
 ### Run specific integration test file:
 ```bash
-poetry run pytest tests_entraid/integration/test_provider_integration.py -v
+uv run --frozen pytest lks-idprovider-entraid/tests_entraid/integration/test_provider_integration.py -v
 ```
 
 ### Run only tests that don't require user tokens:
 ```bash
-poetry run pytest tests_entraid/integration/ -v -k "not user_token and not ropc"
+uv run --frozen pytest lks-idprovider-entraid/tests_entraid/integration/ -v -k "not user_token and not ropc"
 ```
 
 ### Skip integration tests (run only unit tests):
 ```bash
-poetry run pytest tests_entraid/ -v --ignore=tests_entraid/integration
+uv run --frozen pytest lks-idprovider-entraid/tests_entraid/ -v --ignore=lks-idprovider-entraid/tests_entraid/integration
 ```
 
 ## Test Coverage
@@ -121,13 +118,8 @@ poetry run pytest tests_entraid/ -v --ignore=tests_entraid/integration
 **Recommended approach** for integration tests:
 
 1. **Manual token acquisition**:
-   - Use Azure Portal or Azure CLI to get a token
+  - Obtain an ID token for the configured test application
    - Set `AZURE_TEST_USER_TOKEN` environment variable
-
-   ```bash
-   # Using Azure CLI
-   az account get-access-token --resource https://graph.microsoft.com --query accessToken -o tsv
-   ```
 
 2. **Automated CI/CD**:
    - Use a service principal with delegated permissions
@@ -147,35 +139,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: |
-          pip install poetry
-          poetry install
+        run: uv sync --all-packages --all-groups --frozen
       - name: Run integration tests
         env:
           ENTRAID_TENANT_ID: ${{ secrets.ENTRAID_TENANT_ID }}
           ENTRAID_CLIENT_ID: ${{ secrets.ENTRAID_CLIENT_ID }}
           ENTRAID_CLIENT_SECRET: ${{ secrets.ENTRAID_CLIENT_SECRET }}
         run: |
-          poetry run pytest tests_entraid/integration/ -v
-```
-
-### Jenkins Example:
-```groovy
-stage('Integration Tests') {
-    environment {
-        ENTRAID_TENANT_ID = credentials('azure-tenant-id')
-        ENTRAID_CLIENT_ID = credentials('azure-client-id')
-        ENTRAID_CLIENT_SECRET = credentials('azure-client-secret')
-    }
-    steps {
-        sh 'poetry run pytest tests_entraid/integration/ -v'
-    }
-}
+            uv run --frozen pytest lks-idprovider-entraid/tests_entraid/integration/ -v
 ```
 
 ## Troubleshooting

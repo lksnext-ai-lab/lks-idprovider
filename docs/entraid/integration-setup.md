@@ -2,13 +2,13 @@
 
 ## Step-by-Step Guide
 
-### 1. Create your `.env` file
+Run commands from the repository root unless otherwise noted. These tests make
+live requests and require an appropriately configured test tenant.
 
-In the root of the `lks-idprovider-entraid` directory:
+### 1. Configure credentials
 
-```bash
-cp .env.example .env
-```
+Set the environment variables described below in your shell or a local secret
+manager. The repository does not provide an `.env.example` file.
 
 ### 2. Get your Azure credentials
 
@@ -53,7 +53,7 @@ Your app registration needs these Microsoft Graph permissions:
 
 3. Grant admin consent if required
 
-### 4. Fill in your `.env` file
+### 4. Set environment variables
 
 ```env
 ENTRAID_TENANT_ID=12345678-1234-1234-1234-123456789abc
@@ -65,48 +65,33 @@ ENTRAID_CLIENT_SECRET=your-secret-value-here~1234567890
 
 ```bash
 # Run all integration tests
-poetry run pytest tests_entraid/integration/ -v
+uv run --frozen pytest lks-idprovider-entraid/tests_entraid/integration/ -v
 
 # Run only basic connectivity tests (no user token needed)
-poetry run pytest tests_entraid/integration/ -v -k "not user_token and not ropc"
+uv run --frozen pytest lks-idprovider-entraid/tests_entraid/integration/ -v -k "not user_token and not ropc"
 
 # Run with coverage
-poetry run pytest tests_entraid/integration/ -v --cov=src
+uv run --frozen pytest lks-idprovider-entraid/tests_entraid/integration/ -v --cov=lks_idprovider_entraid
 ```
 
 ## Getting a User Token (Optional)
 
 For tests that require a user access token (`test_get_user_info_with_user_token`, etc.):
 
-### Easy way - Using Azure CLI:
-
-```bash
-# Get a token for Microsoft Graph
-az account get-access-token --resource https://graph.microsoft.com --query accessToken -o tsv
-```
-
-Copy the token and add to `.env`:
+The provider integration tests default to an ID token issued for the configured
+client. Obtain one through an appropriate login flow for the test application;
+a Microsoft Graph access token is not interchangeable with that ID token. Set the
+token in the environment:
 ```env
 AZURE_TEST_USER_TOKEN=eyJ0eXAiOiJKV1QiLCJub25jZSI6...
 ```
 
 **Note**: Tokens expire after 1 hour, so you'll need to regenerate periodically.
 
-### Alternative - Using PowerShell:
-
-```powershell
-# Connect to Azure AD
-Connect-AzAccount
-
-# Get access token
-$token = (Get-AzAccessToken -ResourceUrl "https://graph.microsoft.com").Token
-echo $token
-```
-
 ## Troubleshooting
 
 ### "Azure credentials not configured"
-- Make sure your `.env` file exists in the project root
+- Make sure the environment variables are set for the test process
 - Check that variable names match exactly (case-sensitive)
 - Verify the `.env` file is not empty
 

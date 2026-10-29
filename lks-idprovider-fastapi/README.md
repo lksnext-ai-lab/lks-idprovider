@@ -15,5 +15,8 @@ This package provides reusable FastAPI dependencies, decorators, and middleware 
 2. Configure your provider (e.g., Keycloak) in your FastAPI app.
 3. Inject the provider into the dependencies from this package.
 
+For installation and a complete Keycloak example, see the
+[partner integration guide](https://github.com/lksnext-ai-lab/lks-idprovider/blob/main/docs/partner-integration.md).
+
 ## License
 AGPL-3.0-only

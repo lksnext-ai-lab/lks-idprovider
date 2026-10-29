@@ -87,8 +87,6 @@ docs/
 # CI/CD
 .github/
 .gitlab-ci.yml
-Jenkinsfile*
-.jenkins/
 
 # Local development
 .local/

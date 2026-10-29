@@ -1,3 +1,8 @@
+# Historical document
+
+This plan describes past intentions and is not current setup or release guidance.
+For current instructions, see the [repository README](../../README.md).
+
 # LKS-idprovider Implementation Plan
 
 ## Overview
@@ -258,14 +263,12 @@ This design allows:
 - [x] Set up development dependencies
 - [x] Configure linting and formatting tools
 - [x] Create Docker-based build system for CI/CD
-- [x] Set up Jenkins pipeline for automated builds
-- [x] Configure Nexus repository publishing
+- [x] Set up automated builds and distribution
 - [x] Test package installation and build process
 
 **Files created/updated:**
 - `pyproject.toml` (already configured)
 - `Dockerfile` (multi-stage build)
-- `Jenkinsfile` (CI/CD pipeline)
 - `docker-compose.yml` (development environment)
 - `Makefile` (updated with Docker commands)
 - `.dockerignore` (build optimization)
@@ -290,7 +293,7 @@ This design allows:
 **Files to create:**
 - `docker-compose.dev.yml` ✅ COMPLETED
 - `keycloak-config/lks-test-realm.json` ✅ COMPLETED
-- `keycloak-config/README.md` ✅ COMPLETED
+- `docs/keycloak-development.md` (current local setup)
 - `tests/conftest.py`
 - `tests/test_project_structure.py`
 - `pyproject.toml`
@@ -608,7 +611,6 @@ This design allows:
 **Files to create:**
 - `tests/test_packaging.py`
 - `Dockerfile` (if not exists)
-- `Jenkinsfile` (if not exists)
 - `.github/workflows/` (if using GitHub Actions)
 
 ## Test-Driven Development Workflow

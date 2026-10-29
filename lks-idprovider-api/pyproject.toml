@@ -47,7 +47,7 @@ exclude = [
 
 
 
-# Publishing configuration
+# Build configuration
 [tool.poetry.build]
 generate-setup-file = false
 

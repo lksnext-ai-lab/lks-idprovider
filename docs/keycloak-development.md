@@ -1,6 +1,7 @@
 # LKS ID Provider - Development Environment
 
-This directory contains the development environment setup for the LKS ID Provider project.
+Run the commands below from the repository root. This environment and its
+credentials are for local testing only, not production.
 
 ## Quick Start
 
@@ -51,7 +52,6 @@ export KEYCLOAK_BASE_URL="http://localhost:8080"
 export KEYCLOAK_REALM="lks-test"
 export KEYCLOAK_CLIENT_ID="PythonServiceTest"
 export KEYCLOAK_CLIENT_SECRET="python-service-secret-123"
-export REDIS_URL="redis://localhost:6379"
 ```
 
 ## Getting Test Tokens
@@ -97,19 +97,13 @@ curl -X POST \
    docker-compose -f docker-compose.dev.yml up -d
    ```
 
-2. **Access Python development container:**
+2. **Install the workspace and run Keycloak tests locally:**
    ```bash
-   docker-compose -f docker-compose.dev.yml exec python-dev bash
+   uv sync --all-packages --all-groups --frozen
+   uv run --frozen pytest lks-idprovider-keycloak/tests_keycloak -v
    ```
 
-3. **Run tests:**
-   ```bash
-   # Inside the python-dev container
-   cd /workspace/lks-idprovider-keycloak
-   python -m pytest tests/ -v
-   ```
-
-4. **Stop services:**
+3. **Stop services:**
    ```bash
    docker-compose -f docker-compose.dev.yml down
    ```
@@ -117,8 +111,7 @@ curl -X POST \
 ## Services
 
 - **Keycloak**: http://localhost:8080 (Identity Provider)
-- **Redis**: localhost:6379 (Caching)
-- **PostgreSQL**: localhost:5432 (Optional database for Keycloak)
+- **PostgreSQL**: localhost:5432 (database for Keycloak)
 
 ## Troubleshooting
 

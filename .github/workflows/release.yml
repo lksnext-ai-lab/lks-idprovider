@@ -2,7 +2,6 @@ name: Release
 
 # Creates a GitHub Release with the wheel + sdist of ONE package per tag, named <package>-v<version>, e.g.
 #   api-v0.1.7  keycloak-v0.1.5  entraid-v0.1.4  fastapi-v0.1.1
-# (same convention the old Jenkins "Tag Release" stage used).
 # Consumers install from the release assets (see README, "Installation").
 on:
   push:

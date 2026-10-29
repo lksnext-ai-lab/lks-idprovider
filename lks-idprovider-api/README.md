@@ -27,7 +27,6 @@ This package contains the core API specification for the LKS-idprovider ecosyste
 
 - **IdentityProvider**: Main protocol for token validation and authentication
 - **ClientCredentialsProvider**: Protocol for OAuth2 client credentials flow
-- **TokenValidator**: Protocol for token validation logic
 
 ### Models
 
@@ -41,4 +40,7 @@ This package contains the core API specification for the LKS-idprovider ecosyste
 ### Configuration
 
 - **ProviderConfig**: Base configuration for identity providers
-- **Validation contracts**: Ensure provider implementations meet requirements
+- Provider-specific configuration is supplied by each implementation.
+
+See the [API specification](https://github.com/lksnext-ai-lab/lks-idprovider/blob/main/docs/API_SPECIFICATION.md)
+and [partner integration guide](https://github.com/lksnext-ai-lab/lks-idprovider/blob/main/docs/partner-integration.md).

@@ -135,6 +135,15 @@
       },
       "protocolMappers": [
         {
+          "name": "api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "PythonServiceTest",
+            "access.token.claim": "true"
+          }
+        },
+        {
           "name": "username",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-property-mapper",

@@ -1,6 +1,7 @@
 # Entra ID Integration Tests for FastAPI
 
-This directory contains integration tests for the Entra ID provider with FastAPI dependencies.
+These integration tests cover the Entra ID provider with FastAPI dependencies.
+Run commands from the repository root unless otherwise noted.
 
 ## Overview
 
@@ -9,7 +10,7 @@ These tests verify that the `lks-idprovider-entraid` package works correctly wit
 - ✅ Authentication via ID tokens
 - ✅ Auth context retrieval
 - ✅ Login required dependency
-- ✅ Role-based access control
+- Role-based integration cases are currently skipped
 - ✅ Multiple endpoints with same token
 
 ## Prerequisites
@@ -26,15 +27,14 @@ You need an Azure AD application configured with:
 Obtain a valid ID token for testing. You can use the `get_id_token.py` script from the `lks-idprovider-entraid` package:
 
 ```bash
-cd ../lks-idprovider-entraid
-poetry run python get_id_token.py
+uv run --frozen python lks-idprovider-entraid/get_id_token.py
 ```
 
 This will display your ID token which you can use for testing.
 
 ### 3. Environment Variables
 
-Create a `.env` file in the `lks-idprovider-fastapi` directory (copy from `.env.example`):
+Set these variables in the environment used to run the tests:
 
 ```bash
 ENTRAID_TENANT_ID=your-tenant-id
@@ -49,21 +49,20 @@ AZURE_TEST_USER_TOKEN=your-id-token-here
 First, install the required packages:
 
 ```bash
-# From lks-idprovider-fastapi directory
-poetry install
+uv sync --all-packages --all-groups --frozen
 ```
 
 ### Run Integration Tests
 
 ```bash
 # Run all Entra ID integration tests
-poetry run pytest tests/integration/entraid/ -v
+uv run --frozen pytest lks-idprovider-fastapi/tests/integration/entraid/ -v
 
 # Run specific test
-poetry run pytest tests/integration/entraid/test_entraid_dependencies_integration.py::test_auth_context_user -v
+uv run --frozen pytest lks-idprovider-fastapi/tests/integration/entraid/test_entraid_dependencies_integration.py -v
 
 # Skip integration tests
-poetry run pytest tests/ -v -m "not integration"
+uv run --frozen pytest lks-idprovider-fastapi/tests/ -v --ignore-glob='**/integration/**'
 ```
 
 ## Test Coverage
@@ -75,9 +74,9 @@ poetry run pytest tests/ -v -m "not integration"
 | `test_auth_context_missing_token` | Request without token | Returns 403 Forbidden |
 | `test_login_required_user` | Login required with valid token | Returns User identity |
 | `test_login_required_invalid` | Login required with invalid token | Returns 401 Unauthorized |
-| `test_requires_role_with_token` | Role check with token | Returns 200 or 403 based on roles |
-| `test_requires_role_invalid_token` | Role check with invalid token | Returns 401 Unauthorized |
-| `test_requires_any_role_with_token` | Multiple role check | Returns 200 or 403 based on roles |
+| `test_requires_role_with_token` | Role check with token | Skipped |
+| `test_requires_role_invalid_token` | Role check with invalid token | Skipped |
+| `test_requires_any_role_with_token` | Multiple role check | Skipped |
 | `test_multiple_endpoints_same_token` | Use same token on multiple endpoints | All succeed with same identity |
 | `test_token_validation_with_provider_lifecycle` | Provider lifecycle management | Token validated correctly |
 
@@ -103,11 +102,8 @@ config = EntraIDConfig(
 
 ### Role-Based Tests
 
-The role-based tests (`test_requires_role_*`, `test_requires_any_role_*`) will:
-- Return **200** if your test user has the required role(s)
-- Return **403** if your test user doesn't have the required role(s)
-
-Both outcomes are valid - the tests verify the dependency works correctly.
+The role-based integration cases are currently skipped and do not verify role
+enforcement against Entra ID.
 
 To test with specific roles:
 1. Configure App Roles in your Azure AD application
@@ -122,8 +118,7 @@ ID tokens typically expire after 1 hour. If tests start failing with authenticat
 
 ```bash
 # Get a fresh token
-cd ../lks-idprovider-entraid
-poetry run python get_id_token.py
+uv run --frozen python lks-idprovider-entraid/get_id_token.py
 # Update AZURE_TEST_USER_TOKEN in .env
 ```
 
@@ -132,10 +127,7 @@ poetry run python get_id_token.py
 If you get import errors:
 
 ```bash
-# Make sure both packages are installed
-poetry install
-cd ../lks-idprovider-entraid
-poetry install
+uv sync --all-packages --all-groups --frozen
 ```
 
 ### Connection Errors
@@ -156,9 +148,8 @@ To run these tests in CI/CD:
     ENTRAID_CLIENT_ID: ${{ secrets.ENTRAID_CLIENT_ID }}
     AZURE_TEST_USER_TOKEN: ${{ secrets.AZURE_TEST_USER_TOKEN }}
   run: |
-    cd lks-idprovider-fastapi
-    poetry install
-    poetry run pytest tests/integration/entraid/ -v
+    uv sync --all-packages --all-groups --frozen
+    uv run --frozen pytest lks-idprovider-fastapi/tests/integration/entraid/ -v
 ```
 
 Store the credentials as repository secrets.
@@ -166,5 +157,4 @@ Store the credentials as repository secrets.
 ## Related Documentation
 
 - [lks-idprovider-entraid README](../../lks-idprovider-entraid/README.md)
-- [Integration Tests Setup](../../lks-idprovider-entraid/tests_entraid/integration/README.md)
-- [Azure AD Token Types](../../lks-idprovider-entraid/AZURE_TOKEN_TYPES.md)
+- [Integration tests](../entraid/integration-tests.md)

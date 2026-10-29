@@ -30,19 +30,10 @@ This package provides a complete Azure Entra ID implementation of the LKS-idprov
 
 ## Installation
 
-```bash
-# Basic installation
-pip install lks-idprovider-entraid
-
-# With Microsoft Graph SDK support
-pip install lks-idprovider-entraid[graph]
-
-# With Redis caching support
-pip install lks-idprovider-entraid[redis]
-
-# Full installation with all optional dependencies
-pip install lks-idprovider-entraid[all]
-```
+Install the Entra ID and API packages from compatible GitHub Release assets.
+The API package must be supplied explicitly because GitHub Releases is not a
+package index. See the [repository installation guidance](https://github.com/lksnext-ai-lab/lks-idprovider#installation-and-integration)
+and [releases](https://github.com/lksnext-ai-lab/lks-idprovider/releases).
 
 ## Quick Start
 
@@ -71,22 +62,6 @@ async with provider:
     print(f"Identity: {auth_context.identity.name}")
     print(f"Type: {auth_context.identity.identity_type}")
     print(f"Roles: {[role.name for role in auth_context.roles]}")
-```
-
-### Client Credentials Flow
-
-```python
-from lks_idprovider_entraid import EntraIDClientCredentialsProvider
-
-# Create provider
-cc_provider = EntraIDClientCredentialsProvider(config)
-
-# Get token (uses azure.identity internally)
-token_response = await cc_provider.get_client_credentials_token(
-    scopes=["https://graph.microsoft.com/.default"]
-)
-
-access_token = token_response["access_token"]
 ```
 
 ## Configuration
@@ -200,11 +175,8 @@ poetry run pytest tests_entraid/ --cov=src/lks_idprovider_entraid --cov-report=h
 
 ## Documentation
 
-For detailed documentation, see:
-- [Implementation Plan](../IMPLEMENTATION_PLAN_ENTRAID.md)
-- [Azure Entra ID vs Keycloak Comparison](../ENTRAID_VS_KEYCLOAK.md)
-- [Azure Identity Benefits](../AZURE_IDENTITY_BENEFITS.md)
-- [Quick Start Guide](../QUICKSTART_ENTRAID.md)
+See the [integration test setup](https://github.com/lksnext-ai-lab/lks-idprovider/blob/main/docs/entraid/integration-setup.md)
+and [integration test guide](https://github.com/lksnext-ai-lab/lks-idprovider/blob/main/docs/entraid/integration-tests.md).
 
 ## License
 
